@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原神游戏启动器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #4cc9f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #f72585, #b5179e, #7209b7, #560bad, #480ca8, #3a0ca3, #3f37c9, #4361ee, #4895ef, #4cc9f0);
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .game-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 25px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #f72585 0%, #3a0ca3 50%, #4cc9f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.7);
+            animation: pulse 2s infinite alternate;
+        }
+        
+        .game-icon i {
+            font-size: 60px;
+            color: white;
+        }
+        
+        .question-box {
+            background-color: rgba(30, 30, 60, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid #4361ee;
+        }
+        
+        .question {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-agree {
+            background: linear-gradient(to right, #4cc9f0, #4361ee);
+            color: white;
+        }
+        
+        .btn-agree:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(76, 201, 240, 0.4);
+            background: linear-gradient(to right, #3a0ca3, #4361ee);
+        }
+        
+        .btn-refuse {
+            background: linear-gradient(to right, #f72585, #b5179e);
+            color: white;
+            transition: all 0.5s ease;
+        }
+        
+        .btn-refuse:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(247, 37, 133, 0.4);
+        }
+        
+        .btn-refuse.shrinking {
+            animation: shrink 0.5s ease forwards;
+        }
+        
+        .btn i {
+            font-size: 1.6rem;
+        }
+        
+        .instructions {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(30, 30, 60, 0.5);
+            border-radius: 15px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #b0b0d0;
+            border-left: 4px solid #4cc9f0;
+        }
+        
+        .instructions h3 {
+            color: #4cc9f0;
+            margin-bottom: 10px;
+        }
+        
+        .counter {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #f72585;
+            height: 30px;
+        }
+        
+        .launch-status {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(30, 60, 30, 0.5);
+            border-radius: 15px;
+            display: none;
+            border: 2px solid #4ade80;
+        }
+        
+        .launch-status.active {
+            display: block;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .status-icon {
+            font-size: 3rem;
+            color: #4ade80;
+            margin-bottom: 15px;
+        }
+        
+        .status-text {
+            font-size: 1.4rem;
+            color: #a0f0a0;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(76, 201, 240, 0.7); }
+            100% { transform: scale(1.05); box-shadow: 0 0 30px rgba(76, 201, 240, 0.9); }
+        }
+        
+        @keyframes shrink {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .question {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 15px 30px;
+                font-size: 1.2rem;
+                min-width: 150px;
+            }
+            
+            .buttons {
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+        
+        .footer {
+            margin-top: 40px;
+            color: #7070a0;
+            font-size: 0.9rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="game-icon">
+            <i class="fas fa-gamepad"></i>
+        </div>
+        
+        <h1>原神游戏启动器</h1>
+        <div class="subtitle">
+            专为安卓设备设计的原神游戏快速启动页面<br>
+            支持所有安装了原神游戏的安卓手机型号
+        </div>
+        
+        <div class="question-box">
+            <div class="question">
+                您是否要启动原神游戏？
+            </div>
+            
+            <div class="counter" id="counter">
+                拒绝按钮点击次数: <span id="click-count">0</span>/5
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-agree" id="agree-btn">
+                    <i class="fas fa-play-circle"></i> 同意并启动
+                </button>
+                <button class="btn btn-refuse" id="refuse-btn">
+                    <i class="fas fa-times-circle"></i> 拒绝
+                </button>
+            </div>
+        </div>
+        
+        <div class="launch-status" id="launch-status">
+            <div class="status-icon">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <div class="status-text" id="status-text">
+                正在启动原神游戏...
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用说明：</h3>
+            <p>1. 此页面仅适用于已安装原神游戏的安卓设备</p>
+            <p>2. 点击"同意并启动"按钮将尝试启动您设备上的原神游戏</p>
+            <p>3. 点击"拒绝"按钮会使其缩小，点击5次后按钮将完全消失</p>
+            <p>4. 如果游戏未启动，请确保您的设备已安装原神游戏</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 原神游戏启动器 | 此页面仅为演示用途，与原神官方无关联</p>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const agreeBtn = document.getElementById('agree-btn');
+        const refuseBtn = document.getElementById('refuse-btn');
+        const launchStatus = document.getElementById('launch-status');
+        const statusText = document.getElementById('status-text');
+        const clickCountElement = document.getElementById('click-count');
+        const counterElement = document.getElementById('counter');
+        
+        // 初始化点击计数器
+        let clickCount = 0;
+        const maxClicks = 5;
+        
+        // 同意按钮点击事件
+        agreeBtn.addEventListener('click', function() {
+            // 显示启动状态
+            launchStatus.classList.add('active');
+            statusText.textContent = "正在启动原神游戏...";
+            
+            // 尝试启动原神游戏
+            setTimeout(() => {
+                // 这里应该使用原神游戏的URL Scheme
+                // 常见的URL Scheme格式可能是 "yuanshen://" 或 "genshinimpact://"
+                // 但实际的原神URL Scheme需要官方文档确认
+                
+                // 尝试通过URL Scheme启动
+                const gameUrl = "yuanshen://launch"; // 假设的原神URL Scheme
+                
+                // 创建一个隐藏的iframe来尝试启动应用
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = gameUrl;
+                document.body.appendChild(iframe);
+                
+                // 设置超时检查应用是否启动成功
+                setTimeout(() => {
+                    // 如果应用启动成功，页面通常不会发生变化
+                    // 如果应用未安装，可能会跳转到应用商店或停留在当前页面
+                    statusText.textContent = "原神游戏启动中...";
+                    
+                    // 模拟不同的启动状态
+                    setTimeout(() => {
+                        statusText.textContent = "正在连接服务器...";
+                        
+                        setTimeout(() => {
+                            statusText.textContent = "原神游戏已启动！";
+                            // 添加成功图标
+                            launchStatus.innerHTML = `
+                                <div class="status-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="status-text">
+                                    原神游戏已启动成功！<br>
+                                    <small>如果游戏未自动打开，请手动点击设备上的原神图标</small>
+                                </div>
+                            `;
+                        }, 1500);
+                    }, 1500);
+                }, 1000);
+                
+                // 移除iframe
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 2000);
+                
+            }, 1000);
+        });
+        
+        // 拒绝按钮点击事件
+        refuseBtn.addEventListener('click', function() {
+            clickCount++;
+            clickCountElement.textContent = clickCount;
+            
+            // 每次点击都缩小按钮
+            const scale = 1 - (clickCount * 0.15);
+            refuseBtn.style.transform = `scale(${scale})`;
+            
+            // 更新按钮文本
+            if (clickCount < maxClicks) {
+                refuseBtn.innerHTML = `<i class="fas fa-times-circle"></i> 拒绝 (${clickCount}/${maxClicks})`;
+            }
+            
+            // 如果达到最大点击次数
+            if (clickCount >= maxClicks) {
+                // 添加缩小动画类
+                refuseBtn.classList.add('shrinking');
+                
+                // 禁用按钮
+                refuseBtn.disabled = true;
+                
+                // 动画结束后移除按钮
+                setTimeout(() => {
+                    refuseBtn.style.display = 'none';
+                    counterElement.innerHTML = "拒绝按钮已消失！";
+                    counterElement.style.color = "#4ade80";
+                }, 500);
+            }
+        });
+        
+        // 添加一些视觉效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始动画
+            const elements = document.querySelectorAll('.container > *');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 + (index * 150));
+            });
+        });
+        
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(event) {
+            // 按A键或回车键触发同意
+            if (event.key === 'a' || event.key === 'A' || event.key === 'Enter') {
+                agreeBtn.click();
+                agreeBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    agreeBtn.style.transform = '';
+                }, 200);
+            }
+            
+            // 按R键触发拒绝
+            if (event.key === 'r' || event.key === 'R') {
+                refuseBtn.click();
+                refuseBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    refuseBtn.style.transform = `scale(${1 - (clickCount * 0.15)})`;
+                }, 200);
+            }
+        });
+    </script>
+</body>
+</html>
